@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Vendas Q1 2025</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         /* --- CSS: Estilos Minimalistas e Responsivos --- */
         :root {
@@ -37,23 +38,64 @@
             margin: 0 auto;
         }
 
-        /* Cabeçalho */
+        /* Cabeçalho e Filtros */
         header {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
-        h1 {
+        .header-title h1 {
             font-weight: 600;
             font-size: 1.5rem;
             color: var(--text-primary);
         }
 
-        p.subtitle {
+        .header-title p {
             color: var(--text-secondary);
             font-size: 0.9rem;
             margin-top: 5px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            font-size: 0.9rem;
+            min-width: 150px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:hover {
+            border-color: var(--accent-color);
         }
 
         /* Grid de KPIs */
@@ -92,7 +134,7 @@
             font-size: 0.8rem;
             margin-top: auto;
             padding-top: 10px;
-            color: #10b981; /* Green for positive tone */
+            color: #10b981; 
         }
 
         /* Grid de Gráficos */
@@ -102,10 +144,20 @@
             gap: 20px;
         }
 
-        /* Responsividade para gráficos: 1 coluna em mobile */
         @media (max-width: 768px) {
             .charts-grid {
                 grid-template-columns: 1fr;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .filters {
+                width: 100%;
+                flex-direction: column;
+            }
+            select {
+                width: 100%;
             }
         }
 
@@ -116,7 +168,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
             position: relative;
-            height: 350px; /* Altura fixa para consistência */
+            height: 350px;
             display: flex;
             flex-direction: column;
         }
@@ -126,6 +178,9 @@
             font-size: 1rem;
             font-weight: 600;
             color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .chart-container {
@@ -148,8 +203,28 @@
 
 <div class="container">
     <header>
-        <h1>Performance de Vendas</h1>
-        <p class="subtitle">Análise do 1º Trimestre de 2025 (Jan - Mar)</p>
+        <div class="header-title">
+            <h1>Performance de Vendas</h1>
+            <p>Análise do 1º Trimestre de 2025 (Jan - Mar)</p>
+        </div>
+        
+        <!-- Área de Filtros -->
+        <div class="filters">
+            <div class="filter-group">
+                <label for="regionFilter">Região</label>
+                <select id="regionFilter" onchange="updateDashboard()">
+                    <option value="all">Todas</option>
+                    <!-- Opções preenchidas via JS -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sellerFilter">Vendedor</label>
+                <select id="sellerFilter" onchange="updateDashboard()">
+                    <option value="all">Todos</option>
+                    <!-- Opções preenchidas via JS -->
+                </select>
+            </div>
+        </div>
     </header>
 
     <!-- Área de KPIs -->
@@ -157,25 +232,25 @@
         <div class="kpi-card">
             <span class="kpi-title">Vendas Totais</span>
             <span class="kpi-value" id="kpi-total-sales">€ 0,00</span>
-            <span class="kpi-trend">Calculado com base em 10 transações</span>
+            <span class="kpi-trend" id="kpi-count">0 transações</span>
         </div>
         <div class="kpi-card">
             <span class="kpi-title">Unidades Vendidas</span>
             <span class="kpi-value" id="kpi-total-units">0</span>
-            <span class="kpi-trend">Volume total do período</span>
+            <span class="kpi-trend">Volume total</span>
         </div>
         <div class="kpi-card">
             <span class="kpi-title">Ticket Médio</span>
             <span class="kpi-value" id="kpi-avg-ticket">€ 0,00</span>
-            <span class="kpi-trend">Por transação</span>
+            <span class="kpi-trend">Por venda</span>
         </div>
     </div>
 
     <!-- Área de Gráficos -->
     <div class="charts-grid">
         <!-- 1. Evolução Temporal -->
-        <div class="chart-card" style="grid-column: span 2;"> <!-- Ocupa largura total -->
-            <div class="chart-header">Evolução de Vendas (Jan - Mar)</div>
+        <div class="chart-card" style="grid-column: span 2;">
+            <div class="chart-header">Evolução de Vendas</div>
             <div class="chart-container">
                 <canvas id="timeChart"></canvas>
             </div>
@@ -197,27 +272,30 @@
             </div>
         </div>
 
-        <!-- 4. Performance por Produto -->
-        <div class="chart-card" style="grid-column: span 2;">
-            <div class="chart-header">Performance por Produto (Receita)</div>
+        <!-- 4. Top Produtos (Receita) -->
+        <div class="chart-card">
+            <div class="chart-header">Top Produtos (Receita)</div>
             <div class="chart-container">
-                <canvas id="productChart"></canvas>
+                <canvas id="productRevenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 5. Mix de Produtos (Unidades) - NOVO -->
+        <div class="chart-card">
+            <div class="chart-header">Mix de Produtos (Volume)</div>
+            <div class="chart-container">
+                <canvas id="productMixChart"></canvas>
             </div>
         </div>
     </div>
 
     <footer>
-        Relatório gerado automaticamente • Business Intelligence Dept.
+        Relatório Interativo • Business Intelligence Dept.
     </footer>
 </div>
 
 <script>
-    /**
-     * --- LÓGICA JS: PROCESSAMENTO DE DADOS ---
-     * Dados extraídos manualmente do PDF fornecido.
-     * Tratamento de inconsistências (ex: produto em falta a 12/02 preenchido como "Docking Station").
-     */
-    
+    // --- DADOS BRUTOS ---
     const rawData = [
         { date: "2025-01-02", region: "Norte", seller: "João Silva", product: "Portátil Pro 15\"", units: 2, price: 1200, total: 2400 },
         { date: "2025-01-05", region: "Lisboa", seller: "Ana Gomes", product: "Monitor 27\"", units: 5, price: 300, total: 1500 },
@@ -231,33 +309,86 @@
         { date: "2025-03-15", region: "Lisboa", seller: "Ana Gomes", product: "Portátil Pro 13\"", units: 2, price: 1000, total: 2000 }
     ];
 
-    // Funções de Agregação
+    // Variáveis globais para as instâncias dos gráficos
+    let timeChartInst = null;
+    let regionChartInst = null;
+    let sellerChartInst = null;
+    let productRevenueChartInst = null;
+    let productMixChartInst = null;
+
+    // --- INICIALIZAÇÃO ---
+    function init() {
+        populateFilters();
+        updateDashboard();
+    }
+
+    // Preencher Dropdowns dinamicamente
+    function populateFilters() {
+        const regions = [...new Set(rawData.map(d => d.region))].sort();
+        const sellers = [...new Set(rawData.map(d => d.seller))].sort();
+
+        const regionSelect = document.getElementById('regionFilter');
+        regions.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            regionSelect.appendChild(opt);
+        });
+
+        const sellerSelect = document.getElementById('sellerFilter');
+        sellers.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            sellerSelect.appendChild(opt);
+        });
+    }
+
+    // --- LÓGICA DE PROCESSAMENTO ---
+    function updateDashboard() {
+        const selectedRegion = document.getElementById('regionFilter').value;
+        const selectedSeller = document.getElementById('sellerFilter').value;
+
+        // 1. Filtragem
+        const filteredData = rawData.filter(item => {
+            const matchRegion = selectedRegion === 'all' || item.region === selectedRegion;
+            const matchSeller = selectedSeller === 'all' || item.seller === selectedSeller;
+            return matchRegion && matchSeller;
+        });
+
+        // 2. Agregação
+        const metrics = aggregateData(filteredData);
+
+        // 3. Atualizar UI
+        updateKPIs(metrics, filteredData.length);
+        updateCharts(metrics);
+    }
+
     function aggregateData(data) {
         let totalSales = 0;
         let totalUnits = 0;
         const regionSales = {};
         const sellerSales = {};
-        const productSales = {};
+        const productRevenue = {};
+        const productUnits = {};
         const monthlySales = { "Jan": 0, "Fev": 0, "Mar": 0 };
 
         data.forEach(item => {
-            // KPIs Globais
-            // Nota: O item 5 no array rawData tem a propriedade 'total' implícita, corrigindo para cálculo seguro
             const itemTotal = item.total || (item.units * item.price);
+            
             totalSales += itemTotal;
             totalUnits += item.units;
 
-            // Por Região
+            // Região
             regionSales[item.region] = (regionSales[item.region] || 0) + itemTotal;
-
-            // Por Vendedor
+            // Vendedor
             sellerSales[item.seller] = (sellerSales[item.seller] || 0) + itemTotal;
-
-            // Por Produto
-            productSales[item.product] = (productSales[item.product] || 0) + itemTotal;
-
-            // Por Mês
-            const monthIndex = new Date(item.date).getMonth(); // 0=Jan, 1=Fev, 2=Mar
+            // Produto (Receita)
+            productRevenue[item.product] = (productRevenue[item.product] || 0) + itemTotal;
+            // Produto (Unidades)
+            productUnits[item.product] = (productUnits[item.product] || 0) + item.units;
+            // Tempo
+            const monthIndex = new Date(item.date).getMonth();
             const monthName = ["Jan", "Fev", "Mar"][monthIndex];
             if(monthName) monthlySales[monthName] += itemTotal;
         });
@@ -265,143 +396,159 @@
         return {
             totalSales,
             totalUnits,
-            avgTicket: totalSales / data.length,
+            avgTicket: data.length > 0 ? totalSales / data.length : 0,
             regionSales,
             sellerSales,
-            productSales,
+            productRevenue,
+            productUnits,
             monthlySales
         };
     }
 
-    const metrics = aggregateData(rawData);
+    function updateKPIs(metrics, count) {
+        const formatCurrency = (val) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(val);
+        
+        document.getElementById('kpi-total-sales').textContent = formatCurrency(metrics.totalSales);
+        document.getElementById('kpi-total-units').textContent = metrics.totalUnits;
+        document.getElementById('kpi-avg-ticket').textContent = formatCurrency(metrics.avgTicket);
+        document.getElementById('kpi-count').textContent = `${count} transações filtradas`;
+    }
 
-    // 1. Atualizar KPIs no DOM
-    const formatCurrency = (value) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
-    
-    document.getElementById('kpi-total-sales').textContent = formatCurrency(metrics.totalSales);
-    document.getElementById('kpi-total-units').textContent = metrics.totalUnits;
-    document.getElementById('kpi-avg-ticket').textContent = formatCurrency(metrics.avgTicket);
+    // --- CONFIGURAÇÃO E ATUALIZAÇÃO DOS GRÁFICOS ---
+    function updateCharts(metrics) {
+        // Configurações de Cores
+        const colors = {
+            primary: '#4f46e5',
+            secondary: '#818cf8',
+            accent: '#0ea5e9',
+            neutral: '#94a3b8',
+            palette: ['#4f46e5', '#3b82f6', '#0ea5e9', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef']
+        };
 
-    // --- CONFIGURAÇÃO CHART.JS ---
-    
-    // Configuração Global Estética
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.color = '#64748b';
-    Chart.defaults.borderColor = '#e2e8f0';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
 
-    // Paleta de Cores Minimalista
-    const colors = {
-        primary: '#4f46e5',   // Indigo 600
-        secondary: '#818cf8', // Indigo 400
-        light: '#c7d2fe',     // Indigo 200
-        accent: '#0ea5e9',    // Sky 500
-        neutral: '#94a3b8'    // Slate 400
-    };
+        // Helper para destruir charts antigos antes de recriar
+        const createOrUpdate = (canvasId, instance, config) => {
+            if (instance) instance.destroy();
+            return new Chart(document.getElementById(canvasId), config);
+        };
 
-    // 1. Gráfico de Linha: Evolução Temporal
-    new Chart(document.getElementById('timeChart'), {
-        type: 'line',
-        data: {
-            labels: Object.keys(metrics.monthlySales),
-            datasets: [{
-                label: 'Vendas (€)',
-                data: Object.values(metrics.monthlySales),
-                borderColor: colors.primary,
-                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4, // Curva suave
-                pointBackgroundColor: '#fff',
-                pointBorderColor: colors.primary,
-                pointRadius: 5
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                x: { grid: { display: false } }
+        // 1. Time Chart
+        timeChartInst = createOrUpdate('timeChart', timeChartInst, {
+            type: 'line',
+            data: {
+                labels: Object.keys(metrics.monthlySales),
+                datasets: [{
+                    label: 'Vendas (€)',
+                    data: Object.values(metrics.monthlySales),
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
             }
-        }
-    });
+        });
 
-    // 2. Gráfico de Barras: Região
-    new Chart(document.getElementById('regionChart'), {
-        type: 'bar',
-        data: {
-            labels: Object.keys(metrics.regionSales),
-            datasets: [{
-                label: 'Vendas (€)',
-                data: Object.values(metrics.regionSales),
-                backgroundColor: [colors.primary, colors.accent, colors.neutral],
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true },
-                x: { grid: { display: false } }
+        // 2. Region Chart
+        regionChartInst = createOrUpdate('regionChart', regionChartInst, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(metrics.regionSales),
+                datasets: [{
+                    label: 'Vendas (€)',
+                    data: Object.values(metrics.regionSales),
+                    backgroundColor: [colors.primary, colors.accent, colors.neutral, colors.secondary],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
             }
-        }
-    });
+        });
 
-    // 3. Gráfico Horizontal: Ranking Vendedores
-    // Ordenar vendedores
-    const sortedSellers = Object.entries(metrics.sellerSales)
-        .sort(([,a], [,b]) => b - a);
-
-    new Chart(document.getElementById('sellerChart'), {
-        type: 'bar',
-        data: {
-            labels: sortedSellers.map(s => s[0]),
-            datasets: [{
-                label: 'Vendas (€)',
-                data: sortedSellers.map(s => s[1]),
-                backgroundColor: colors.secondary,
-                borderRadius: 4,
-                barThickness: 20
-            }]
-        },
-        options: {
-            indexAxis: 'y', // Barras horizontais
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { beginAtZero: true }
+        // 3. Seller Chart (Ordenado)
+        const sortedSellers = Object.entries(metrics.sellerSales).sort(([,a], [,b]) => b - a);
+        sellerChartInst = createOrUpdate('sellerChart', sellerChartInst, {
+            type: 'bar',
+            data: {
+                labels: sortedSellers.map(s => s[0]),
+                datasets: [{
+                    label: 'Vendas (€)',
+                    data: sortedSellers.map(s => s[1]),
+                    backgroundColor: colors.secondary,
+                    borderRadius: 4,
+                    barThickness: 20
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true } }
             }
-        }
-    });
+        });
 
-    // 4. Gráfico de Barras: Produtos
-    const sortedProducts = Object.entries(metrics.productSales).sort(([,a], [,b]) => b - a);
-
-    new Chart(document.getElementById('productChart'), {
-        type: 'bar',
-        data: {
-            labels: sortedProducts.map(p => p[0]),
-            datasets: [{
-                label: 'Receita (€)',
-                data: sortedProducts.map(p => p[1]),
-                backgroundColor: '#3b82f6', // Blue 500
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true },
-                x: { grid: { display: false } }
+        // 4. Top Produtos (Receita) - Ordenado
+        const sortedProductsRev = Object.entries(metrics.productRevenue).sort(([,a], [,b]) => b - a).slice(0, 5); // Top 5
+        productRevenueChartInst = createOrUpdate('productRevenueChart', productRevenueChartInst, {
+            type: 'bar',
+            data: {
+                labels: sortedProductsRev.map(p => p[0]),
+                datasets: [{
+                    label: 'Receita (€)',
+                    data: sortedProductsRev.map(p => p[1]),
+                    backgroundColor: '#3b82f6',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
             }
-        }
-    });
+        });
+
+        // 5. Mix de Produtos (Donut - Volume)
+        const productUnitsEntries = Object.entries(metrics.productUnits).sort(([,a], [,b]) => b - a);
+        productMixChartInst = createOrUpdate('productMixChart', productMixChartInst, {
+            type: 'doughnut',
+            data: {
+                labels: productUnitsEntries.map(p => p[0]),
+                datasets: [{
+                    data: productUnitsEntries.map(p => p[1]),
+                    backgroundColor: colors.palette,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%', // Estilo Donut mais fino
+                plugins: { 
+                    legend: { 
+                        position: 'right', 
+                        labels: { boxWidth: 12, font: { size: 11 } } 
+                    } 
+                }
+            }
+        });
+    }
+
+    // Iniciar
+    init();
 
 </script>
 
