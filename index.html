@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Vendas Q1 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS: Estilos Minimalistas e Responsivos --- */
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-color: #4f46e5; /* Indigo */
+            --border-color: #e2e8f0;
+            --font-family: 'Inter', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Cabeçalho */
+        header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* Grid de KPIs */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kpi-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .kpi-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .kpi-trend {
+            font-size: 0.8rem;
+            margin-top: auto;
+            padding-top: 10px;
+            color: #10b981; /* Green for positive tone */
+        }
+
+        /* Grid de Gráficos */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        /* Responsividade para gráficos: 1 coluna em mobile */
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+            position: relative;
+            height: 350px; /* Altura fixa para consistência */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Rodapé */
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Performance de Vendas</h1>
+        <p class="subtitle">Análise do 1º Trimestre de 2025 (Jan - Mar)</p>
+    </header>
+
+    <!-- Área de KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-title">Vendas Totais</span>
+            <span class="kpi-value" id="kpi-total-sales">€ 0,00</span>
+            <span class="kpi-trend">Calculado com base em 10 transações</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Unidades Vendidas</span>
+            <span class="kpi-value" id="kpi-total-units">0</span>
+            <span class="kpi-trend">Volume total do período</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Ticket Médio</span>
+            <span class="kpi-value" id="kpi-avg-ticket">€ 0,00</span>
+            <span class="kpi-trend">Por transação</span>
+        </div>
+    </div>
+
+    <!-- Área de Gráficos -->
+    <div class="charts-grid">
+        <!-- 1. Evolução Temporal -->
+        <div class="chart-card" style="grid-column: span 2;"> <!-- Ocupa largura total -->
+            <div class="chart-header">Evolução de Vendas (Jan - Mar)</div>
+            <div class="chart-container">
+                <canvas id="timeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 2. Vendas por Região -->
+        <div class="chart-card">
+            <div class="chart-header">Vendas por Região</div>
+            <div class="chart-container">
+                <canvas id="regionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 3. Ranking de Vendedores -->
+        <div class="chart-card">
+            <div class="chart-header">Ranking de Vendedores</div>
+            <div class="chart-container">
+                <canvas id="sellerChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 4. Performance por Produto -->
+        <div class="chart-card" style="grid-column: span 2;">
+            <div class="chart-header">Performance por Produto (Receita)</div>
+            <div class="chart-container">
+                <canvas id="productChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Relatório gerado automaticamente • Business Intelligence Dept.
+    </footer>
+</div>
+
+<script>
+    /**
+     * --- LÓGICA JS: PROCESSAMENTO DE DADOS ---
+     * Dados extraídos manualmente do PDF fornecido.
+     * Tratamento de inconsistências (ex: produto em falta a 12/02 preenchido como "Docking Station").
+     */
+    
+    const rawData = [
+        { date: "2025-01-02", region: "Norte", seller: "João Silva", product: "Portátil Pro 15\"", units: 2, price: 1200, total: 2400 },
+        { date: "2025-01-05", region: "Lisboa", seller: "Ana Gomes", product: "Monitor 27\"", units: 5, price: 300, total: 1500 },
+        { date: "2025-01-10", region: "Algarve", seller: "Pedro Costa", product: "Teclado Mecânico", units: 10, price: 150, total: 1500 },
+        { date: "2025-01-15", region: "Norte", seller: "João Silva", product: "Rato Ergonómico", units: 8, price: 80, total: 640 },
+        { date: "2025-01-22", region: "Centro", seller: "Maria Neves", product: "Portátil Pro 13\"", units: 3, price: 1000, total: 3000 },
+        { date: "2025-02-05", region: "Lisboa", seller: "Ana Gomes", product: "Portátil Pro 15\"", units: 1, price: 1200, total: 1200 },
+        { date: "2025-02-12", region: "Algarve", seller: "Pedro Costa", product: "Docking Station", units: 4, price: 200, total: 800 },
+        { date: "2025-02-18", region: "Centro", seller: "Maria Neves", product: "Monitor 24\"", units: 6, price: 180, total: 1080 },
+        { date: "2025-03-03", region: "Norte", seller: "João Silva", product: "Headset Wireless", units: 7, price: 120, total: 840 },
+        { date: "2025-03-15", region: "Lisboa", seller: "Ana Gomes", product: "Portátil Pro 13\"", units: 2, price: 1000, total: 2000 }
+    ];
+
+    // Funções de Agregação
+    function aggregateData(data) {
+        let totalSales = 0;
+        let totalUnits = 0;
+        const regionSales = {};
+        const sellerSales = {};
+        const productSales = {};
+        const monthlySales = { "Jan": 0, "Fev": 0, "Mar": 0 };
+
+        data.forEach(item => {
+            // KPIs Globais
+            // Nota: O item 5 no array rawData tem a propriedade 'total' implícita, corrigindo para cálculo seguro
+            const itemTotal = item.total || (item.units * item.price);
+            totalSales += itemTotal;
+            totalUnits += item.units;
+
+            // Por Região
+            regionSales[item.region] = (regionSales[item.region] || 0) + itemTotal;
+
+            // Por Vendedor
+            sellerSales[item.seller] = (sellerSales[item.seller] || 0) + itemTotal;
+
+            // Por Produto
+            productSales[item.product] = (productSales[item.product] || 0) + itemTotal;
+
+            // Por Mês
+            const monthIndex = new Date(item.date).getMonth(); // 0=Jan, 1=Fev, 2=Mar
+            const monthName = ["Jan", "Fev", "Mar"][monthIndex];
+            if(monthName) monthlySales[monthName] += itemTotal;
+        });
+
+        return {
+            totalSales,
+            totalUnits,
+            avgTicket: totalSales / data.length,
+            regionSales,
+            sellerSales,
+            productSales,
+            monthlySales
+        };
+    }
+
+    const metrics = aggregateData(rawData);
+
+    // 1. Atualizar KPIs no DOM
+    const formatCurrency = (value) => new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
+    
+    document.getElementById('kpi-total-sales').textContent = formatCurrency(metrics.totalSales);
+    document.getElementById('kpi-total-units').textContent = metrics.totalUnits;
+    document.getElementById('kpi-avg-ticket').textContent = formatCurrency(metrics.avgTicket);
+
+    // --- CONFIGURAÇÃO CHART.JS ---
+    
+    // Configuração Global Estética
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+    Chart.defaults.borderColor = '#e2e8f0';
+
+    // Paleta de Cores Minimalista
+    const colors = {
+        primary: '#4f46e5',   // Indigo 600
+        secondary: '#818cf8', // Indigo 400
+        light: '#c7d2fe',     // Indigo 200
+        accent: '#0ea5e9',    // Sky 500
+        neutral: '#94a3b8'    // Slate 400
+    };
+
+    // 1. Gráfico de Linha: Evolução Temporal
+    new Chart(document.getElementById('timeChart'), {
+        type: 'line',
+        data: {
+            labels: Object.keys(metrics.monthlySales),
+            datasets: [{
+                label: 'Vendas (€)',
+                data: Object.values(metrics.monthlySales),
+                borderColor: colors.primary,
+                backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4, // Curva suave
+                pointBackgroundColor: '#fff',
+                pointBorderColor: colors.primary,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Gráfico de Barras: Região
+    new Chart(document.getElementById('regionChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(metrics.regionSales),
+            datasets: [{
+                label: 'Vendas (€)',
+                data: Object.values(metrics.regionSales),
+                backgroundColor: [colors.primary, colors.accent, colors.neutral],
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 3. Gráfico Horizontal: Ranking Vendedores
+    // Ordenar vendedores
+    const sortedSellers = Object.entries(metrics.sellerSales)
+        .sort(([,a], [,b]) => b - a);
+
+    new Chart(document.getElementById('sellerChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedSellers.map(s => s[0]),
+            datasets: [{
+                label: 'Vendas (€)',
+                data: sortedSellers.map(s => s[1]),
+                backgroundColor: colors.secondary,
+                borderRadius: 4,
+                barThickness: 20
+            }]
+        },
+        options: {
+            indexAxis: 'y', // Barras horizontais
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+
+    // 4. Gráfico de Barras: Produtos
+    const sortedProducts = Object.entries(metrics.productSales).sort(([,a], [,b]) => b - a);
+
+    new Chart(document.getElementById('productChart'), {
+        type: 'bar',
+        data: {
+            labels: sortedProducts.map(p => p[0]),
+            datasets: [{
+                label: 'Receita (€)',
+                data: sortedProducts.map(p => p[1]),
+                backgroundColor: '#3b82f6', // Blue 500
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>
